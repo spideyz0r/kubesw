@@ -12,13 +12,16 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+var debug bool
+
 func main() {
 	help := getopt.BoolLong("help", 'h', "display this help")
-	debug := getopt.BoolLong("debug", 'd', "debug mode")
+	debug_argv := getopt.BoolLong("debug", 'd', "debug mode")
 	context := getopt.StringLong("context", 'c', "", "set a context\n-l to list all, \n-u to get current")
 	namespace := getopt.StringLong("namespace", 'n', "", "set a namespace\n-l to list all, \n-u to get current")
 
 	getopt.Parse()
+	debug = *debug_argv
 
 	if *help {
 		getopt.Usage()
@@ -26,7 +29,7 @@ func main() {
 	}
 
 	new_kube_config_path, kubeconfig_kubesw_dir := initial_setup()
-	if *debug {
+	if debug {
 		fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
 	}
 
@@ -82,7 +85,9 @@ func update_namespace(kube_config, namespace string) {
 		fmt.Printf("Failed to write kubeconfig file: %v", err)
 		os.Exit(1)
 	}
-	// fmt.Printf("Updated namespace to %s\n", namespace)
+	if debug {
+		fmt.Printf("Updated namespace to %s\n", namespace)
+	}
 }
 
 func get_current_namespace() string {
@@ -125,7 +130,9 @@ func update_context(kubeconfig_kubesw_dir, context, namespace string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// fmt.Printf("Wrote %s\n", context_file)
+	if debug {
+		fmt.Printf("Wrote %s\n", context_file)
+	}
 	return context_file
 }
 
@@ -174,11 +181,15 @@ func read_bashrc() string {
 	for _, rc_file := range rc_files {
 		_, err := os.Stat(rc_file)
 		if os.IsNotExist(err) {
-			// fmt.Printf("File %s does not exist, skipping...\n", rc_file)
+			if debug {
+				fmt.Printf("File %s does not exist, skipping...\n", rc_file)
+			}
 			continue
 		}
 
-		// fmt.Printf("Reading %s\n", rc_file)
+		if debug {
+			fmt.Printf("Reading %s\n", rc_file)
+		}
 		file, err := os.Open(rc_file)
 		if err != nil {
 			log.Fatal(err)
@@ -251,7 +262,6 @@ func list_namespaces() {
 }
 
 // TODO
-// Add verbose mode and remove all prints
 // Read configuration like rc files and PS1 from configuration file
 // Add support for other shells
 // Split namespaces list
