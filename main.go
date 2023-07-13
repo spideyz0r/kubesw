@@ -15,8 +15,8 @@ import (
 func main() {
 	help := getopt.BoolLong("help", 'h', "display this help")
 	debug := getopt.BoolLong("debug", 'd', "debug mode")
-	context := getopt.StringLong("context", 'c', "", "set a context. use -l to list all")
-	namespace := getopt.StringLong("namespace", 'n', "", "set a namespace. use -l to list all")
+	context := getopt.StringLong("context", 'c', "", "set a context\n-l to list all, \n-u to get current")
+	namespace := getopt.StringLong("namespace", 'n', "", "set a namespace\n-l to list all, \n-u to get current")
 
 	getopt.Parse()
 
