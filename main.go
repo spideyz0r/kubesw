@@ -205,7 +205,23 @@ func read_bashrc() string {
 	return all_rc_files
 }
 
+func detect_shell() string {
+	shell := os.Getenv("SHELL")
+	if shell == "" {
+		log.Fatal("Failed to detect shell")
+	}
+	return shell
+}
+
 func spawn_shell(kube_config string) {
+	switch detect_shell() {
+	case "/bin/bash":
+		spawn_bash(kube_config)
+	default:
+		log.Fatal("Unsupported shell")
+	}
+}
+func spawn_bash(kube_config string) {
 	current_rc := read_bashrc()
 	tmp_rc, err := ioutil.TempFile("", "kubesw_rc")
 	if err != nil {
