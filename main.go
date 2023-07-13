@@ -38,7 +38,7 @@ func main() {
 		os.Exit(0)
 	}
 	if *context == "-u" {
-		fmt.Printf("%s\n", get_current_context())
+		fmt.Printf("%s\n", get_current("context"))
 		os.Exit(0)
 	}
 
@@ -47,12 +47,12 @@ func main() {
 		os.Exit(0)
 	}
 	if *namespace == "-u" {
-		fmt.Printf("%s\n", get_current_namespace())
+		fmt.Printf("%s\n", get_current("namespace"))
 		os.Exit(0)
 	}
 
 	if *context == "" {
-		*context = get_current_context()
+		*context = get_current("context")
 	}
 
 	if *namespace == "" {
@@ -90,22 +90,18 @@ func update_namespace(kube_config, namespace string) {
 	}
 }
 
-func get_current_namespace() string {
-	cmd := exec.Command("kubectl", "config", "view", "--minify", "--flatten", "--output", "jsonpath={.contexts[?(@.name==\""+get_current_context()+"\")].context.namespace}")
-	current_namespace, err := cmd.Output()
+func get_current(resource string) string {
+	var cmd *exec.Cmd
+	if resource == "context" {
+		cmd = exec.Command("kubectl", "config", "current-context")
+	}else {
+		cmd = exec.Command("kubectl", "config", "view", "--minify", "--flatten", "--output", "jsonpath={.contexts[?(@.name==\""+get_current("context")+"\")].context.namespace}")
+	}
+	current, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	return strings.TrimSpace(string(current_namespace))
-}
-
-func get_current_context() string {
-	cmd := exec.Command("kubectl", "config", "current-context")
-	current_context, err := cmd.Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return strings.TrimSpace(string(current_context))
+	return strings.TrimSpace(string(current))
 }
 
 func update_context(kubeconfig_kubesw_dir, context, namespace string) string {
