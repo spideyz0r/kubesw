@@ -23,8 +23,5 @@ func init() {
 }
 
 func Execute() error {
-	// new_kube_config_path, kubeconfig_kubesw_dir := common.InitialSetup()
-	// fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
-	// fmt.Printf("KUBESWCONFIG: %s\n", kubeconfig_kubesw_dir)
 	return rootCmd.Execute()
 }
