@@ -12,7 +12,8 @@ var (
 		Use:   "list",
 		Short: "List all contexts or namespaces",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Manage namespaces")
+			fmt.Println("Please specify a subcommand. Use --help for more details.")
+
 		},
 	}
 	namespaceListCmd = &cobra.Command{

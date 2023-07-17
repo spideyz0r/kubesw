@@ -13,7 +13,7 @@ var (
 		Use:   "set",
 		Short: "Set context or namespace",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Manage namespaces")
+			fmt.Println("Please specify a subcommand. Use --help for more details.")
 		},
 	}
 	namespaceSetCmd = &cobra.Command{
