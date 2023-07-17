@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	debug = false
+	debug  = false
 	setCmd = &cobra.Command{
 		Use:   "set",
 		Short: "Set context or namespace",

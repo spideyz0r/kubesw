@@ -42,7 +42,7 @@ func GetCurrent(resource string) string {
 	var cmd *exec.Cmd
 	if resource == "context" {
 		cmd = exec.Command("kubectl", "config", "current-context")
-	}else {
+	} else {
 		cmd = exec.Command("kubectl", "config", "view", "--minify", "--flatten", "--output", "jsonpath={.contexts[?(@.name==\""+GetCurrent("context")+"\")].context.namespace}")
 	}
 	current, err := cmd.Output()
