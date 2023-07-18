@@ -52,3 +52,15 @@ kubesw list namespace
 kubesw set namespace kube-system
 kubesw version
 ```
+## TODO
+Fix the debug flag inside common
+Read extra/optional configurations like rc files and PS1 from the configuration file (maybe use viper)
+Add support to zsh
+Remove namespace string when listing namespaces
+Improve error messages
+Add error checks, param validation, and more outputs for the cobra functions
+Add --global flag for updating the namespace or context globally
+Move history along with the new shell instance (if possible)
+Add shell autocompletion
+Allow short names, ctx for context, and ns for namespace
+Investigate the use of eval instead of spawning shells
