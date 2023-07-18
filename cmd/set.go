@@ -12,6 +12,7 @@ var (
 	debug  = false
 	setCmd = &cobra.Command{
 		Use:   "set",
+		Aliases: []string{"s", "switch"},
 		Short: "Set context or namespace",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Please specify a subcommand. Use --help for more details.")
@@ -19,6 +20,7 @@ var (
 	}
 	namespaceSetCmd = &cobra.Command{
 		Use:   "namespace",
+		Aliases: []string{"ns", "namespaces"},
 		Short: "set namespace",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) != 1 {
@@ -38,6 +40,7 @@ var (
 	}
 	contextSetCmd = &cobra.Command{
 		Use:   "context",
+		Aliases: []string{"ctx", "contexts"},
 		Short: "set a context",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) != 1 {

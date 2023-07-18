@@ -11,6 +11,7 @@ import (
 var (
 	getCmd = &cobra.Command{
 		Use:   "get",
+		Aliases: []string{"g", "current"},
 		Short: "Get current context or namespace",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Please specify a subcommand. Use --help for more details.")
@@ -18,6 +19,7 @@ var (
 	}
 	namespaceGetCmd = &cobra.Command{
 		Use:   "namespace",
+		Aliases: []string{"ns", "namespaces"},
 		Short: "get namespace",
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
@@ -27,6 +29,7 @@ var (
 	}
 	contextGetCmd = &cobra.Command{
 		Use:   "context",
+		Aliases: []string{"ctx", "contexts"},
 		Short: "get a context",
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
