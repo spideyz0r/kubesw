@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	common "kubesw/pkg/common"
+	common "github.com/spideyz0r/kubesw/pkg/common"
 
 	"github.com/spf13/cobra"
 )
