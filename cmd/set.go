@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	common "github.com/spideyz0r/kubesw/pkg/common"
 
 	"github.com/spf13/cobra"
@@ -24,6 +25,8 @@ var (
 				fmt.Println("Please specify a single namespace")
 				return
 			}
+			debug, _ := cmd.Flags().GetBool("debug")
+			common.SetDebug(debug)
 			new_kube_config_path, kubeconfig_kubesw_dir := common.InitialSetup()
 			if debug {
 				fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
@@ -41,6 +44,8 @@ var (
 				fmt.Println("Please specify a single context")
 				return
 			}
+			debug, _ := cmd.Flags().GetBool("debug")
+			common.SetDebug(debug)
 			new_kube_config_path, kubeconfig_kubesw_dir := common.InitialSetup()
 			if debug {
 				fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
@@ -54,4 +59,6 @@ var (
 func init() {
 	setCmd.AddCommand(namespaceSetCmd)
 	setCmd.AddCommand(contextSetCmd)
+	namespaceSetCmd.Flags().Bool("debug", false, "Enable debug mode")
+	contextSetCmd.Flags().Bool("debug", false, "Enable debug mode")
 }

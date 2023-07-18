@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	common "github.com/spideyz0r/kubesw/pkg/common"
 
 	"github.com/spf13/cobra"
@@ -19,14 +20,17 @@ var (
 		Use:   "namespace",
 		Short: "get namespace",
 		Run: func(cmd *cobra.Command, args []string) {
+			debug, _ := cmd.Flags().GetBool("debug")
+			common.SetDebug(debug)
 			fmt.Printf("%s\n", common.GetCurrent("namespace"))
-
 		},
 	}
 	contextGetCmd = &cobra.Command{
 		Use:   "context",
 		Short: "get a context",
 		Run: func(cmd *cobra.Command, args []string) {
+			debug, _ := cmd.Flags().GetBool("debug")
+			common.SetDebug(debug)
 			fmt.Printf("%s\n", common.GetCurrent("context"))
 		},
 	}
@@ -35,4 +39,6 @@ var (
 func init() {
 	getCmd.AddCommand(namespaceGetCmd)
 	getCmd.AddCommand(contextGetCmd)
+	namespaceGetCmd.Flags().Bool("debug", false, "Enable debug mode")
+	contextGetCmd.Flags().Bool("debug", false, "Enable debug mode")
 }

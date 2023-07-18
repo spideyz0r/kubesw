@@ -67,7 +67,6 @@ $ kubesw get namespace
 kube-system
 ```
 ## TODO
-- Fix the debug flag inside common
 - Read extra/optional configurations like rc files and PS1 from the configuration file (maybe use viper)
 - Add support to zsh
 - Remove namespace string when listing namespaces

@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	common "github.com/spideyz0r/kubesw/pkg/common"
 
 	"github.com/spf13/cobra"
@@ -20,6 +21,8 @@ var (
 		Use:   "namespace",
 		Short: "list namespace",
 		Run: func(cmd *cobra.Command, args []string) {
+			debug, _ := cmd.Flags().GetBool("debug")
+			common.SetDebug(debug)
 			common.ListNamespaces()
 		},
 	}
@@ -27,6 +30,8 @@ var (
 		Use:   "context",
 		Short: "list a context",
 		Run: func(cmd *cobra.Command, args []string) {
+			debug, _ := cmd.Flags().GetBool("debug")
+			common.SetDebug(debug)
 			common.ListContexts()
 		},
 	}
@@ -35,4 +40,6 @@ var (
 func init() {
 	listCmd.AddCommand(namespaceListCmd)
 	listCmd.AddCommand(contextListCmd)
+	namespaceListCmd.Flags().Bool("debug", false, "Enable debug mode")
+	contextListCmd.Flags().Bool("debug", false, "Enable debug mode")
 }
