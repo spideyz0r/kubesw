@@ -2,7 +2,7 @@
 %global go_release go1.18.10
 
 Name:           kubesw
-Version:        0.0.3
+Version:        0.0.4
 Release:        1%{?dist}
 Summary:        kubesw, a tool to switch context and namespaces per terminal
 License:        GPLv3
@@ -35,6 +35,9 @@ install -Dpm 0755 %{name} %{buildroot}%{_bindir}/%{name}
 %license LICENSE
 
 %changelog
+* Mon Jul 17 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.4-1
+- Code updates
+
 * Mon Jul 17 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.3-1
 - PS1 bugfix
 
