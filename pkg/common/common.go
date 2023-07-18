@@ -236,3 +236,4 @@ func ListNamespaces() {
 // Add error checks, param validation, and more outputs for the cobra functions
 // Add --global flag for updating the namespace or context globally
 // Move history along with the new shell instance (if possible)
+// Add shell autocompletion
