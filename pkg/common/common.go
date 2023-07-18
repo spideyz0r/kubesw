@@ -149,16 +149,20 @@ func read_bashrc() string {
 	return all_rc_files
 }
 
-func detect_shell() string {
+func detect_shell() (string, error) {
 	shell := os.Getenv("SHELL")
 	if shell == "" {
-		log.Fatal("Failed to detect shell")
+		return "", fmt.Errorf("Failed to detect shell")
 	}
-	return shell
+	return shell, nil
 }
 
 func SpawnShell(kube_config string) {
-	switch detect_shell() {
+	shell, err := detect_shell()
+	if err != nil {
+		log.Fatal(err)
+	}
+	switch shell {
 	case "/bin/bash":
 		spawn_bash(kube_config)
 	default:
