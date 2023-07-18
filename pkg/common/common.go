@@ -229,11 +229,10 @@ func ListNamespaces() {
 
 // TODO
 // Put back the debug flag
-// Read extra/optional configurations like rc files and PS1 from the configuration file
-// Add support for other shells
+// Read extra/optional configurations like rc files and PS1 from the configuration file (maybe use viper)
+// Add support to zsh
 // Split namespace string when listing namespaces
 // Improve error messages
-// Add tests
-// Add release, test, rpmbuilder pipelines
 // Add error checks, param validation, and more outputs for the cobra functions
 // Add --global flag for updating the namespace or context globally
+// Move history along with the new shell instance (if possible)
