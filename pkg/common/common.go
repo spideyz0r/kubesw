@@ -183,7 +183,7 @@ func spawn_bash(kube_config string) {
 	[[ -f "$HOME/.bash_login" ]]  && source "$HOME/.bash_login"
 	[[ -f "$HOME/.profile" ]] && source "$HOME/.profile"
 	export KUBECONFIG=` + kube_config + `:$KUBECONFIG
-	export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
+	# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
 	`
 
 	rc := fmt.Sprintf("%s\n%s", current_rc, extra_rc_configuration)
