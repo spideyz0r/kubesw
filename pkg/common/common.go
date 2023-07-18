@@ -248,9 +248,14 @@ func ListNamespaces() {
 		fmt.Printf("Listing namespaces\n")
 	}
 	cmd := exec.Command("kubectl", "get", "namespaces", "--no-headers=true", "-o", "name")
-	namespaces, err := cmd.Output()
+	raw_namespaces, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(strings.TrimSpace(string(namespaces)))
+	var namespaces []string
+	lines := strings.Split(strings.TrimSpace(string(raw_namespaces)), "\n")
+	for _, line := range lines {
+		namespaces = append(namespaces, strings.Split(line, "/")[1])
+	}
+	fmt.Println(strings.Join(namespaces, "\n"))
 }
