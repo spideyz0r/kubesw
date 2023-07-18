@@ -1,7 +1,7 @@
 package main
 
 import (
-	"kubesw/cmd"
+	"github.com/spideyz0r/kubesw/cmd"
 )
 
 var debug bool
