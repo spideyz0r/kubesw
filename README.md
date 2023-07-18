@@ -82,7 +82,16 @@ kubesw ls ns
 kubesw switch ns "somenamespace"
 ```
 
+## Auto-completion
+The autocompletion script can be generated with the following:
+```
+kubesw completion bash
+```
 
+You can add the following line to your ~/.bashrc:
+```
+source <(`which kubesw` completion bash)
+```
 
 ## TODO
 - Read extra/optional configurations like rc files and PS1 from the configuration file (maybe use viper)
@@ -90,5 +99,4 @@ kubesw switch ns "somenamespace"
 - Improve error checks and messages
 - Add --global flag for updating the namespace or context globally
 - Move history along with the new shell instance (if possible)
-- Add shell autocompletion
 - Investigate the use of eval instead of spawning shells
