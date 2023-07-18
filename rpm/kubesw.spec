@@ -7,7 +7,7 @@ Release:        1%{?dist}
 Summary:        kubesw, a tool to switch context and namespaces per terminal
 License:        GPLv3
 URL:            https://github.com/spideyz0r/kubesw
-Source0:        %{url}/archive/refs/tags/%{version}.tar.gz
+Source0:        %{url}/archive/refs/tags/v%{version}.tar.gz
 
 BuildRequires:  golang >= %{go_version}
 BuildRequires:  git
