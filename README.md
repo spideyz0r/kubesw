@@ -44,13 +44,27 @@ Use "kubesw [command] --help" for more information about a command.
 
 ## Examples
 ```
-kubesw get context
-kubesw list context
-kubesw set context minikube
-kubesw get namespace
-kubesw list namespace
-kubesw set namespace kube-system
-kubesw version
+$ kubesw list context
+gke_us-central
+k3s
+minikube
+```
+```
+$ kubesw set context minikube
+$ kubesw get context
+minikube
+```
+```
+$ kubesw list namespace
+default
+kube-node-lease
+kube-public
+kube-system
+```
+```
+$ kubesw set namespace kube-system
+$ kubesw get namespace
+kube-system
 ```
 ## TODO
 - Fix the debug flag inside common
