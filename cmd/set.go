@@ -35,7 +35,8 @@ var (
 			}
 			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, common.GetCurrent("context"), args[0])
 			common.UpdateNamespace(kube_config, args[0])
-			common.SpawnShell(kube_config)
+			history := common.InjectShellHistory(cmd.CalledAs(), args[0])
+			common.SpawnShell(kube_config, history)
 		},
 	}
 	contextSetCmd = &cobra.Command{
@@ -54,7 +55,8 @@ var (
 				fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
 			}
 			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, args[0], "default")
-			common.SpawnShell(kube_config)
+			history := common.InjectShellHistory("context", args[0])
+			common.SpawnShell(kube_config, history)
 		},
 	}
 )
