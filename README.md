@@ -1,4 +1,4 @@
-# kubesw [![CI](https://github.com/spideyz0r/kubesw/workflows/gotester/badge.svg)][![CI](https://github.com/spideyz0r/kubesw/workflows/goreleaser/badge.svg)][![CI](https://github.com/spideyz0r/kubesw/workflows/rpm-builder/badge.svg)]
+# kubesw [![CI](https://github.com/spideyz0r/kubesw/workflows/gotester/badge.svg)][![CI](https://github.com/spideyz0r/kubesw/workflows/goreleaser/badge.svg)][![CI](https://github.com/spideyz0r/kubesw/workflows/rpm-builder/badge.svg)] [[![Go Report Card](https://goreportcard.com/badge/github.com/spideyz0r/kubesw)](https://goreportcard.com/report/github.com/spideyz0r/kubesw)]
 `kubesw` is a versatile option for context switching, namespace switching, and prompt customization. It ensures that each shell operates independently, serving as an alternative to tools like Kubectx or Kubens.
 
 It's a dynamic tool designed to enhance your Kubernetes workflow by enabling isolated context and namespace management for each terminal.
