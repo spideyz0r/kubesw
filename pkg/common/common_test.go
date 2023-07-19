@@ -35,25 +35,35 @@ func TestDetectShell(t *testing.T) {
 	}
 }
 
-func TestReadBashrc(t *testing.T) {
+func TestReadRc(t *testing.T) {
 	testCases := []struct {
 		name     string
 		input    string
+		shell    string
 		expected string
 	}{
 		{
 			name:     "/.bashrc",
 			input:    "Test content",
+			shell:    "bash",
+			expected: "\nTest content",
+		},
+		{
+			name:     "/.zshrc",
+			input:    "Test content",
+			shell:    "zsh",
 			expected: "\nTest content",
 		},
 		{
 			name:     "/.bash_logout",
 			input:    "Test content",
+			shell:    "bash",
 			expected: "\nTest content",
 		},
 		{
 			name:     "/.nonexistent",
 			input:    "Anything",
+			shell:    "bash",
 			expected: "",
 		},
 	}
@@ -70,7 +80,7 @@ func TestReadBashrc(t *testing.T) {
 			file.WriteString(tc.input)
 			file.Close()
 
-			actual_rc := read_bashrc()
+			actual_rc := read_rc(tc.shell)
 			if actual_rc != tc.expected {
 				t.Errorf("Expected shell to be >>%s<<, but got >>%s<<", tc.expected, actual_rc)
 			}
