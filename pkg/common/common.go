@@ -124,13 +124,24 @@ func InitialSetup() (string, string) {
 	return strings.Join(existing_files, ":"), kubeconfig_kubesw_dir
 }
 
-func read_bashrc() string {
+func read_rc(shell string) string {
 	if debug {
-		fmt.Printf("Reading bashrc files\n")
+		fmt.Printf("Reading %s rc files\n", shell)
 	}
+	zdotdir := os.Getenv("ZDOTDIR")
 	homedir := os.Getenv("HOME")
-	var all_rc_files string
-	rc_files := []string{
+	if zdotdir == "" && shell == "zsh" {
+		zdotdir = homedir
+	}
+
+	rc_shell := make(map[string][]string)
+	rc_shell["zsh"] = []string{
+		zdotdir + "/.zshrc",
+		zdotdir + "/.zprofile",
+		zdotdir + "/.zlogin",
+		zdotdir + "/.zlogout",
+	}
+	rc_shell["bash"] = []string{
 		homedir + "/.bashrc",
 		homedir + "/.bash_profile",
 		homedir + "/.profile",
@@ -138,7 +149,8 @@ func read_bashrc() string {
 		homedir + "/.bash_logout",
 	}
 
-	for _, rc_file := range rc_files {
+	var all_rc_files string
+	for _, rc_file := range rc_shell[shell] {
 		_, err := os.Stat(rc_file)
 		if os.IsNotExist(err) {
 			if debug {
@@ -183,7 +195,9 @@ func SpawnShell(kube_config, history string) {
 	}
 	switch shell {
 	case "/bin/bash":
-		spawn_bash(kube_config, history)
+		spawn_generic_shell(kube_config, history, "bash")
+	case "/bin/zsh":
+		spawn_generic_shell(kube_config, history, "zsh")
 	default:
 		log.Fatal("Unsupported shell")
 	}
@@ -193,37 +207,86 @@ func InjectShellHistory(option, value string) string {
 	return fmt.Sprintf("kubesw set %s %s", option, value)
 }
 
-func spawn_bash(kube_config, history string) {
-	current_rc := read_bashrc()
-	tmp_rc, err := ioutil.TempFile("", "kubesw_rc")
-	if err != nil {
-		log.Fatal(err)
-	}
-	tmp_rc_path := tmp_rc.Name()
-	defer os.Remove(tmp_rc_path)
+func spawn_generic_shell(kube_config, history, shell string) {
+	// to keep history in bash the user needs to put the following to their bashrc
+	// shopt -s histappend
+	// PROMPT_COMMAND="history -a"
 
-	extra_rc_configuration := `
-	[[ -f "$HOME/.bash_profile" ]] && source "$HOME/.bash_profile"
-	[[ -f "$HOME/.bash_login" ]]  && source "$HOME/.bash_login"
-	[[ -f "$HOME/.profile" ]] && source "$HOME/.profile"
-	export KUBECONFIG=` + kube_config + `:$KUBECONFIG
-	shopt -s histappend
-	PROMPT_COMMAND="history -a; history -n"
-	history -s ` + history + `
-	# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
-	`
+	// to keep history in zsh the user needs to enable setopt inc_append_history
+	// https://zsh.sourceforge.io/Doc/Release/Options.html#index-SHARE_005fHISTORY
+
+	current_rc := read_rc(shell)
+
+	var extra_rc_configuration string
+	var file *os.File
+	var tmp_rc_path string
+	var err error
+	if shell == "bash" {
+		file, err = ioutil.TempFile("", "kubesw_rc")
+		if err != nil {
+			log.Fatal(err)
+		}
+		if debug {
+			fmt.Printf("Created temporary rc file: %s\n", file.Name())
+		}
+		tmp_rc_path = file.Name()
+		defer os.Remove(tmp_rc_path)
+		extra_rc_configuration = `
+		[[ -f "$HOME/.bash_profile" ]] && source "$HOME/.bash_profile"
+		[[ -f "$HOME/.bash_login" ]]  && source "$HOME/.bash_login"
+		[[ -f "$HOME/.profile" ]] && source "$HOME/.profile"
+		export KUBECONFIG=` + kube_config + `:$KUBECONFIG
+		# shopt -s histappend
+		# PROMPT_COMMAND="history -a; history -n"
+		history -n
+		history -s ` + history + `
+		# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
+		`
+	} else {
+		extra_rc_configuration = `
+		[[ -f /etc/zshenv ]] && source "/etc/zshenv"
+		[[ -f /etc/zsh/zshenv ]] && source "/etc/zsh/zshenv"
+		[[ -f "$HOME/.zshenv" ]] && source "$HOME/.zshenv"
+		export KUBECONFIG=` + kube_config + `:$KUBECONFIG
+		# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
+		`
+		tmp_rc_path, err = ioutil.TempDir("", "zdir")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer os.RemoveAll(tmp_rc_path)
+		file, err = os.OpenFile(tmp_rc_path + "/.zshrc", os.O_CREATE|os.O_WRONLY, 0600)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+	}
 
 	rc := fmt.Sprintf("%s\n%s", current_rc, extra_rc_configuration)
-	_, err = tmp_rc.WriteString(rc)
+	if debug {
+		fmt.Printf("Writing to rc file: %s:\n", tmp_rc_path)
+		fmt.Printf("%s\n", rc)
+	}
+	_, err = file.WriteString(rc)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if debug {
-		fmt.Printf("Spawning bash shell with rcfile: %s\n", tmp_rc_path)
+		fmt.Printf("Spawning %s shell with rcfile: %s\n", shell, tmp_rc_path)
 	}
-	cmd := exec.Command("/bin/bash")
-	cmd.Args = []string{"/bin/bash", "--rcfile", tmp_rc_path}
+
+	var cmd *exec.Cmd
+	var env []string
+	if shell == "bash" {
+		cmd = exec.Command("/bin/bash")
+		cmd.Args = []string{"/bin/bash", "--rcfile", tmp_rc_path}
+	} else {
+		cmd = exec.Command("/bin/zsh")
+		env = os.Environ()
+		env = append(env, "ZDOTDIR=" + tmp_rc_path)
+		cmd.Env = env
+	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -236,6 +299,10 @@ func spawn_bash(kube_config, history string) {
 	if err != nil {
 		fmt.Printf("Failed to wait for bash shell: %v", err)
 		log.Fatal(err)
+	}
+	if debug {
+		fmt.Printf("Shell session closed.")
+		fmt.Printf("%s", rc)
 	}
 }
 
