@@ -26,7 +26,7 @@ func UpdateNamespace(kube_config, namespace string) {
 
 	config, err := clientcmd.Load(kubeconfigBytes)
 	if err != nil {
-		fmt.Printf("Failed to load kubeconfig: %v", err)
+		fmt.Printf("Failed to load kubeconfig %s: %v", kube_config, err)
 		os.Exit(1)
 	}
 
@@ -34,7 +34,7 @@ func UpdateNamespace(kube_config, namespace string) {
 
 	err = clientcmd.WriteToFile(*config, kube_config)
 	if err != nil {
-		fmt.Printf("Failed to write kubeconfig file: %v", err)
+		fmt.Printf("Failed to write kubeconfig file %s: %v", kube_config, err)
 		os.Exit(1)
 	}
 	if debug {
@@ -173,7 +173,7 @@ func detect_shell() (string, error) {
 	return shell, nil
 }
 
-func SpawnShell(kube_config string) {
+func SpawnShell(kube_config, history string) {
 	shell, err := detect_shell()
 	if err != nil {
 		log.Fatal(err)
@@ -183,12 +183,17 @@ func SpawnShell(kube_config string) {
 	}
 	switch shell {
 	case "/bin/bash":
-		spawn_bash(kube_config)
+		spawn_bash(kube_config, history)
 	default:
 		log.Fatal("Unsupported shell")
 	}
 }
-func spawn_bash(kube_config string) {
+
+func InjectShellHistory(option, value string) string {
+	return fmt.Sprintf("kubesw set %s %s", option, value)
+}
+
+func spawn_bash(kube_config, history string) {
 	current_rc := read_bashrc()
 	tmp_rc, err := ioutil.TempFile("", "kubesw_rc")
 	if err != nil {
@@ -202,6 +207,9 @@ func spawn_bash(kube_config string) {
 	[[ -f "$HOME/.bash_login" ]]  && source "$HOME/.bash_login"
 	[[ -f "$HOME/.profile" ]] && source "$HOME/.profile"
 	export KUBECONFIG=` + kube_config + `:$KUBECONFIG
+	shopt -s histappend
+	PROMPT_COMMAND="history -a; history -n"
+	history -s ` + history + `
 	# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
 	`
 
