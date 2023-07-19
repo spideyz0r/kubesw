@@ -2,7 +2,7 @@
 %global go_release go1.18.10
 
 Name:           kubesw
-Version:        0.0.8
+Version:        0.0.9
 Release:        1%{?dist}
 Summary:        kubesw, a tool to switch context and namespaces per terminal
 License:        GPLv3
@@ -35,13 +35,16 @@ install -Dpm 0755 %{name} %{buildroot}%{_bindir}/%{name}
 %license LICENSE
 
 %changelog
-* Mon Jul 18 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.8-1
+* Wed Jul 19 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.9-1
+- Add support to zsh
+
+* Tue Jul 18 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.8-1
 - Add keep history feature -- errata: removed 0.0.7
 
-* Mon Jul 18 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.6-1
+* Tue Jul 18 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.6-1
 - Add new features
 
-* Mon Jul 18 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.5-1
+* Tue Jul 18 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.5-1
 - Errata: fix modules and readme
 
 * Mon Jul 17 2023 spideyz0r <47341410+spideyz0r@users.noreply.github.com> 0.0.4-1

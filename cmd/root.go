@@ -20,6 +20,7 @@ func init() {
 	rootCmd.AddCommand(getCmd)
 	rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(getVersion)
 }
 
 func Execute() error {
