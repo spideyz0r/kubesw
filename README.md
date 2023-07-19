@@ -82,7 +82,7 @@ kubesw ls ns
 kubesw switch ns "somenamespace"
 ```
 
-## Auto-completion
+## Autocompletion
 The autocompletion script can be generated with the following:
 ```
 kubesw completion bash
@@ -93,9 +93,32 @@ You can add the following line to your ~/.bashrc:
 source <(`which kubesw` completion bash)
 ```
 
+For zshell, pick a path under $fpath and put the contents of `kubesw completion zsh`:
+```
+kubesw completion zsh >$(echo $fpath | cut -d " " -f1)/_kubesw
+```
+
+## Fix shell history
+In order to have the shell's history, some extra configuration needs to be appended to the rc files.
+This will make each command run to be persisted to the history file right-away.
+
+
+### Bash
+~/.bashrc
+```
+ shopt -s histappend
+PROMPT_COMMAND="history -a"
+```
+
+### Zsh
+~/.zshrc
+```
+setopt inc_append_history
+```
+
+
 ## TODO
 - Read extra/optional configurations like rc files and PS1 from the configuration file (maybe use viper)
-- Add support to zsh
 - Improve error checks and messages
 - Add --global flag for updating the namespace or context globally
 - Investigate the use of eval instead of spawning shells
