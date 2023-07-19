@@ -255,7 +255,7 @@ func spawn_generic_shell(kube_config, history, shell string) {
 			log.Fatal(err)
 		}
 		defer os.RemoveAll(tmp_rc_path)
-		file, err = os.OpenFile(tmp_rc_path + "/.zshrc", os.O_CREATE|os.O_WRONLY, 0600)
+		file, err = os.OpenFile(tmp_rc_path+"/.zshrc", os.O_CREATE|os.O_WRONLY, 0600)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -284,7 +284,7 @@ func spawn_generic_shell(kube_config, history, shell string) {
 	} else {
 		cmd = exec.Command("/bin/zsh")
 		env = os.Environ()
-		env = append(env, "ZDOTDIR=" + tmp_rc_path)
+		env = append(env, "ZDOTDIR="+tmp_rc_path)
 		cmd.Env = env
 	}
 	cmd.Stdin = os.Stdin
