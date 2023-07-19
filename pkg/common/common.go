@@ -124,6 +124,53 @@ func InitialSetup() (string, string) {
 	return strings.Join(existing_files, ":"), kubeconfig_kubesw_dir
 }
 
+
+func read_zshrc() string {
+	if debug {
+		fmt.Printf("Reading zshrc files\n")
+	}
+	homedir := os.Getenv("HOME")
+	zdotdir := os.Getenv("ZDOTDIR")
+	if zdotdir == "" {
+		zdotdir = homedir
+	}
+	var all_rc_files string
+	rc_files := []string{
+		zdotdir + "/.zshrc",
+		zdotdir + "/.zprofile",
+		zdotdir + "/.zshrc",
+		zdotdir + "/.zlogin",
+		zdotdir + "/.zlogout",
+	}
+
+	for _, rc_file := range rc_files {
+		_, err := os.Stat(rc_file)
+		if os.IsNotExist(err) {
+			if debug {
+				fmt.Printf("File %s does not exist, skipping...\n", rc_file)
+			}
+			continue
+		}
+
+		if debug {
+			fmt.Printf("Reading %s\n", rc_file)
+		}
+		file, err := os.Open(rc_file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		content, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		all_rc_files = fmt.Sprintf("%s\n%s", all_rc_files, string(content))
+	}
+	return all_rc_files
+}
+
+
 func read_bashrc() string {
 	if debug {
 		fmt.Printf("Reading bashrc files\n")
@@ -184,6 +231,8 @@ func SpawnShell(kube_config, history string) {
 	switch shell {
 	case "/bin/bash":
 		spawn_bash(kube_config, history)
+	case "/bin/zsh":
+		spawn_zsh(kube_config, history)
 	default:
 		log.Fatal("Unsupported shell")
 	}
@@ -192,6 +241,58 @@ func SpawnShell(kube_config, history string) {
 func InjectShellHistory(option, value string) string {
 	return fmt.Sprintf("kubesw set %s %s", option, value)
 }
+
+func spawn_zsh(kube_config, history string) {
+	current_rc := read_zshrc()
+	extra_rc_configuration := `
+	[[ -f /etc/zshenv ]] && source "/etc/zshenv"
+	[[ -f /etc/zsh/zshenv ]] && source "/etc/zsh/zshenv"
+	[[ -f "$HOME/.zshenv" ]] && source "$HOME/.zshenv"
+	export KUBECONFIG=` + kube_config + `:$KUBECONFIG
+	# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
+	`
+	tempDir, err := ioutil.TempDir("", "zdir")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.RemoveAll(tempDir)
+	file, err := os.OpenFile(tempDir+"/.zshrc", os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	rc := fmt.Sprintf("%s\n%s", current_rc, extra_rc_configuration)
+	_, err = file.WriteString(rc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if debug {
+		fmt.Printf("Spawning zsh shell with ZDOTDIR: %s\n", tempDir)
+	}
+	cmd := exec.Command("/bin/zsh")
+	env := os.Environ()
+	env = append(env, "ZDOTDIR="+tempDir)
+	cmd.Env = env
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Start()
+	if err != nil {
+		fmt.Printf("Failed to start zsh shell: %v", err)
+		log.Fatal(err)
+	}
+	err = cmd.Wait()
+	if err != nil {
+		fmt.Printf("Failed to wait for zsh shell: %v", err)
+		log.Fatal(err)
+	}
+	if debug {
+		fmt.Printf("Shell session is over")
+		fmt.Printf("%s", rc)
+	}
+}
+
 
 func spawn_bash(kube_config, history string) {
 	current_rc := read_bashrc()
