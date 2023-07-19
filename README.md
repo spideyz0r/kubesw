@@ -98,5 +98,4 @@ source <(`which kubesw` completion bash)
 - Add support to zsh
 - Improve error checks and messages
 - Add --global flag for updating the namespace or context globally
-- Move history along with the new shell instance (if possible)
 - Investigate the use of eval instead of spawning shells
