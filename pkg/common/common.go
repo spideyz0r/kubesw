@@ -18,21 +18,24 @@ func SetDebug(d bool) {
 }
 
 func UpdateNamespace(kube_config, namespace string) {
-	kubeconfigBytes, err := ioutil.ReadFile(kube_config)
-	if err != nil {
-		fmt.Printf("Failed to read kubeconfig file: %v", err)
-		os.Exit(1)
-	}
-
-	config, err := clientcmd.Load(kubeconfigBytes)
+	config, err := clientcmd.LoadFromFile(kube_config)
 	if err != nil {
 		fmt.Printf("Failed to load kubeconfig %s: %v", kube_config, err)
 		os.Exit(1)
 	}
+	if debug {
+		fmt.Printf("Loading kubeconfig file %s\n", kube_config)
+	}
 
 	config.Contexts[config.CurrentContext].Namespace = namespace
+	if debug {
+		fmt.Printf("Updating namespace to %s using clientcmd\n", namespace)
+	}
 
 	err = clientcmd.WriteToFile(*config, kube_config)
+	if debug {
+		fmt.Printf("Writing kubeconfig file %s\n", kube_config)
+	}
 	if err != nil {
 		fmt.Printf("Failed to write kubeconfig file %s: %v", kube_config, err)
 		os.Exit(1)
@@ -63,31 +66,24 @@ func UpdateContext(kubeconfig_kubesw_dir, context, namespace string) string {
 	if debug {
 		fmt.Printf("Creating new kubeconfig file for context %s\n", context)
 	}
-	context_file := fmt.Sprintf("%s/%s-%s.yaml", kubeconfig_kubesw_dir, context, namespace)
-	fileMode := os.FileMode(0600)
-	file, err := os.OpenFile(context_file, os.O_CREATE|os.O_WRONLY, fileMode)
+	context_file_path := fmt.Sprintf("%s/%s-%s.yaml", kubeconfig_kubesw_dir, context, namespace)
+	outputFile, err := os.Create(context_file_path)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
-	err = file.Chmod(fileMode)
+	defer outputFile.Close()
+
+	cmd := exec.Command("kubectl", "config", "view", "--minify", "--flatten", "--context", context)
+	cmd.Stdout = outputFile
+	err = cmd.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cmd := exec.Command("kubectl", "config", "view", "--minify", "--flatten", "--context", context)
-	new_ctx_config, err := cmd.Output()
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = file.Write(new_ctx_config)
-	if err != nil {
-		log.Fatal(err)
-	}
 	if debug {
-		fmt.Printf("Wrote %s\n", context_file)
+		fmt.Printf("Wrote %s\n", context_file_path)
 	}
-	return context_file
+	return context_file_path
 }
 
 func InitialSetup() (string, string) {
