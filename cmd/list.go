@@ -10,18 +10,18 @@ import (
 
 var (
 	listCmd = &cobra.Command{
-		Use:   "list",
+		Use:     "list",
 		Aliases: []string{"l", "ls"},
-		Short: "List all contexts or namespaces",
+		Short:   "List all contexts or namespaces",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Please specify a subcommand. Use --help for more details.")
 
 		},
 	}
 	namespaceListCmd = &cobra.Command{
-		Use:   "namespace",
+		Use:     "namespace",
 		Aliases: []string{"ns", "namespaces"},
-		Short: "list namespace",
+		Short:   "list namespace",
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
 			common.SetDebug(debug)
@@ -29,9 +29,9 @@ var (
 		},
 	}
 	contextListCmd = &cobra.Command{
-		Use:   "context",
+		Use:     "context",
 		Aliases: []string{"ctx", "contexts"},
-		Short: "list a context",
+		Short:   "list a context",
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
 			common.SetDebug(debug)
