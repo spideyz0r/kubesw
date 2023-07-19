@@ -106,7 +106,7 @@ This will make each command run to be persisted to the history file right-away.
 ### Bash
 ~/.bashrc
 ```
- shopt -s histappend
+shopt -s histappend
 PROMPT_COMMAND="history -a"
 ```
 
