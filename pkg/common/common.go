@@ -13,6 +13,10 @@ import (
 
 var debug bool
 
+func SetDebug(d bool) {
+	debug = d
+}
+
 func UpdateNamespace(kube_config, namespace string) {
 	kubeconfigBytes, err := ioutil.ReadFile(kube_config)
 	if err != nil {
@@ -40,6 +44,9 @@ func UpdateNamespace(kube_config, namespace string) {
 
 func GetCurrent(resource string) string {
 	var cmd *exec.Cmd
+	if debug {
+		fmt.Printf("Getting current %s\n", resource)
+	}
 	if resource == "context" {
 		cmd = exec.Command("kubectl", "config", "current-context")
 	} else {
@@ -53,6 +60,9 @@ func GetCurrent(resource string) string {
 }
 
 func UpdateContext(kubeconfig_kubesw_dir, context, namespace string) string {
+	if debug {
+		fmt.Printf("Creating new kubeconfig file for context %s\n", context)
+	}
 	context_file := fmt.Sprintf("%s/%s-%s.yaml", kubeconfig_kubesw_dir, context, namespace)
 	fileMode := os.FileMode(0600)
 	file, err := os.OpenFile(context_file, os.O_CREATE|os.O_WRONLY, fileMode)
@@ -81,6 +91,9 @@ func UpdateContext(kubeconfig_kubesw_dir, context, namespace string) string {
 }
 
 func InitialSetup() (string, string) {
+	if debug {
+		fmt.Printf("Performing initial setup\n")
+	}
 	homedir := os.Getenv("HOME")
 	kubeconfig_orig := os.Getenv("KUBECONFIG")
 	kubeconfig_kubesw_dir := fmt.Sprintf("%s/.kube/config.kubesw.d", homedir)
@@ -112,6 +125,9 @@ func InitialSetup() (string, string) {
 }
 
 func read_bashrc() string {
+	if debug {
+		fmt.Printf("Reading bashrc files\n")
+	}
 	homedir := os.Getenv("HOME")
 	var all_rc_files string
 	rc_files := []string{
@@ -162,6 +178,9 @@ func SpawnShell(kube_config string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if debug {
+		fmt.Printf("Spawning shell: %s\n", shell)
+	}
 	switch shell {
 	case "/bin/bash":
 		spawn_bash(kube_config)
@@ -192,6 +211,9 @@ func spawn_bash(kube_config string) {
 		log.Fatal(err)
 	}
 
+	if debug {
+		fmt.Printf("Spawning bash shell with rcfile: %s\n", tmp_rc_path)
+	}
 	cmd := exec.Command("/bin/bash")
 	cmd.Args = []string{"/bin/bash", "--rcfile", tmp_rc_path}
 	cmd.Stdin = os.Stdin
@@ -210,6 +232,9 @@ func spawn_bash(kube_config string) {
 }
 
 func ListContexts() {
+	if debug {
+		fmt.Printf("Listing contexts\n")
+	}
 	cmd := exec.Command("kubectl", "config", "get-contexts", "--no-headers=true", "-o", "name")
 	contexts, err := cmd.Output()
 	if err != nil {
@@ -219,11 +244,18 @@ func ListContexts() {
 }
 
 func ListNamespaces() {
+	if debug {
+		fmt.Printf("Listing namespaces\n")
+	}
 	cmd := exec.Command("kubectl", "get", "namespaces", "--no-headers=true", "-o", "name")
-	namespaces, err := cmd.Output()
+	raw_namespaces, err := cmd.Output()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(strings.TrimSpace(string(namespaces)))
+	var namespaces []string
+	lines := strings.Split(strings.TrimSpace(string(raw_namespaces)), "\n")
+	for _, line := range lines {
+		namespaces = append(namespaces, strings.Split(line, "/")[1])
+	}
+	fmt.Println(strings.Join(namespaces, "\n"))
 }
-
