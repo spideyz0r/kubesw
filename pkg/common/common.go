@@ -124,60 +124,25 @@ func InitialSetup() (string, string) {
 	return strings.Join(existing_files, ":"), kubeconfig_kubesw_dir
 }
 
-
-func read_zshrc() string {
+func read_rc(shell string) string {
 	if debug {
-		fmt.Printf("Reading zshrc files\n")
+		fmt.Printf("Reading %s rc files\n", shell)
 	}
-	homedir := os.Getenv("HOME")
 	zdotdir := os.Getenv("ZDOTDIR")
-	if zdotdir == "" {
+	homedir := os.Getenv("HOME")
+	if zdotdir == "" && shell == "zsh" {
 		zdotdir = homedir
 	}
-	var all_rc_files string
-	rc_files := []string{
+
+	rc_shell := make(map[string][]string)
+	rc_shell["zsh"] = []string{
 		zdotdir + "/.zshrc",
 		zdotdir + "/.zprofile",
 		zdotdir + "/.zshrc",
 		zdotdir + "/.zlogin",
 		zdotdir + "/.zlogout",
 	}
-
-	for _, rc_file := range rc_files {
-		_, err := os.Stat(rc_file)
-		if os.IsNotExist(err) {
-			if debug {
-				fmt.Printf("File %s does not exist, skipping...\n", rc_file)
-			}
-			continue
-		}
-
-		if debug {
-			fmt.Printf("Reading %s\n", rc_file)
-		}
-		file, err := os.Open(rc_file)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer file.Close()
-
-		content, err := ioutil.ReadAll(file)
-		if err != nil {
-			log.Fatal(err)
-		}
-		all_rc_files = fmt.Sprintf("%s\n%s", all_rc_files, string(content))
-	}
-	return all_rc_files
-}
-
-
-func read_bashrc() string {
-	if debug {
-		fmt.Printf("Reading bashrc files\n")
-	}
-	homedir := os.Getenv("HOME")
-	var all_rc_files string
-	rc_files := []string{
+	rc_shell["bash"] = []string{
 		homedir + "/.bashrc",
 		homedir + "/.bash_profile",
 		homedir + "/.profile",
@@ -185,7 +150,8 @@ func read_bashrc() string {
 		homedir + "/.bash_logout",
 	}
 
-	for _, rc_file := range rc_files {
+	var all_rc_files string
+	for _, rc_file := range rc_shell[shell] {
 		_, err := os.Stat(rc_file)
 		if os.IsNotExist(err) {
 			if debug {
@@ -243,7 +209,9 @@ func InjectShellHistory(option, value string) string {
 }
 
 func spawn_zsh(kube_config, history string) {
-	current_rc := read_zshrc()
+	// to keep history user needs to enable setopt inc_append_history
+	// https://zsh.sourceforge.io/Doc/Release/Options.html#index-SHARE_005fHISTORY
+	current_rc := read_rc("zsh")
 	extra_rc_configuration := `
 	[[ -f /etc/zshenv ]] && source "/etc/zshenv"
 	[[ -f /etc/zsh/zshenv ]] && source "/etc/zsh/zshenv"
@@ -293,9 +261,12 @@ func spawn_zsh(kube_config, history string) {
 	}
 }
 
-
 func spawn_bash(kube_config, history string) {
-	current_rc := read_bashrc()
+	// to keep history user needs to put the following to their bashrc
+	// shopt -s histappend
+	// PROMPT_COMMAND="history -a"
+
+	current_rc := read_rc("bash")
 	tmp_rc, err := ioutil.TempFile("", "kubesw_rc")
 	if err != nil {
 		log.Fatal(err)
@@ -308,8 +279,9 @@ func spawn_bash(kube_config, history string) {
 	[[ -f "$HOME/.bash_login" ]]  && source "$HOME/.bash_login"
 	[[ -f "$HOME/.profile" ]] && source "$HOME/.profile"
 	export KUBECONFIG=` + kube_config + `:$KUBECONFIG
-	shopt -s histappend
-	PROMPT_COMMAND="history -a; history -n"
+	# shopt -s histappend
+	# PROMPT_COMMAND="history -a; history -n"
+	history -n
 	history -s ` + history + `
 	# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
 	`
