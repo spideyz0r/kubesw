@@ -35,6 +35,7 @@ Available Commands:
   help        Help about any command
   list        List all contexts or namespaces
   set         Set context or namespace
+  version     Get version of kubesw
 
 Flags:
   -h, --help   help for kubesw
