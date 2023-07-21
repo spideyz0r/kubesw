@@ -69,11 +69,12 @@ kube-system
 ## Aliases / shortnames
 You can also use the short form for each command:
 ```
-namespace => namespaces ns
-context   => contexts ctx
-list      => ls l
-get       => current g
-set       => switch s
+command   => aliases
+namespace => namespaces, ns
+context   => contexts, ctx
+list      => ls, l
+get       => current, g
+set       => switch, s
 ```
 Some examples:
 ```kubesw get ns
