@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strings"
 
+	config "github.com/spideyz0r/kubesw/pkg/config"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -125,41 +126,37 @@ func read_rc(shell string) string {
 	if debug {
 		fmt.Printf("Reading %s rc files\n", shell)
 	}
+
 	zdotdir := os.Getenv("ZDOTDIR")
 	homedir := os.Getenv("HOME")
-	if zdotdir == "" && shell == "zsh" {
-		zdotdir = homedir
+	if zdotdir != "" && shell == "zsh" {
+		homedir = zdotdir
 	}
 
-	rc_shell := make(map[string][]string)
-	rc_shell["zsh"] = []string{
-		zdotdir + "/.zshrc",
-		zdotdir + "/.zprofile",
-		zdotdir + "/.zlogin",
-		zdotdir + "/.zlogout",
+	if homedir == "" {
+		if debug {
+			fmt.Printf("Failed to find homedir, no rc files to return\n")
+		}
+		return ""
 	}
-	rc_shell["bash"] = []string{
-		homedir + "/.bashrc",
-		homedir + "/.bash_profile",
-		homedir + "/.profile",
-		homedir + "/.bash_login",
-		homedir + "/.bash_logout",
-	}
+
+	config := config.ReadConfiguration()
 
 	var all_rc_files string
-	for _, rc_file := range rc_shell[shell] {
-		_, err := os.Stat(rc_file)
+	for _, rc_file := range config.Rc_files[shell] {
+		rc_file_path := fmt.Sprintf("%s/%s", homedir, rc_file)
+		_, err := os.Stat(rc_file_path)
 		if os.IsNotExist(err) {
 			if debug {
-				fmt.Printf("File %s does not exist, skipping...\n", rc_file)
+				fmt.Printf("File %s does not exist, skipping...\n", rc_file_path)
 			}
 			continue
 		}
 
 		if debug {
-			fmt.Printf("Reading %s\n", rc_file)
+			fmt.Printf("Reading %s\n", rc_file_path)
 		}
-		file, err := os.Open(rc_file)
+		file, err := os.Open(rc_file_path)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -175,6 +172,10 @@ func read_rc(shell string) string {
 }
 
 func detect_shell() (string, error) {
+	config := config.ReadConfiguration()
+	if config.Shell != "auto" {
+		return config.Shell, nil
+	}
 	shell := os.Getenv("SHELL")
 	if shell == "" {
 		return "", fmt.Errorf("Failed to detect shell")
@@ -218,6 +219,7 @@ func spawn_generic_shell(kube_config, history, shell string) {
 	var file *os.File
 	var tmp_rc_path string
 	var err error
+
 	if shell == "bash" {
 		file, err = ioutil.TempFile("", "kubesw_rc")
 		if err != nil {
@@ -237,7 +239,6 @@ func spawn_generic_shell(kube_config, history, shell string) {
 		# PROMPT_COMMAND="history -a; history -n"
 		history -n
 		history -s ` + history + `
-		# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
 		`
 	} else {
 		extra_rc_configuration = `
@@ -245,7 +246,6 @@ func spawn_generic_shell(kube_config, history, shell string) {
 		[[ -f /etc/zsh/zshenv ]] && source "/etc/zsh/zshenv"
 		[[ -f "$HOME/.zshenv" ]] && source "$HOME/.zshenv"
 		export KUBECONFIG=` + kube_config + `:$KUBECONFIG
-		# export PS1="[\u@\h \W: $(go run main.go get context) @ $(go run main.go get namespace)]\\$ "
 		`
 		tmp_rc_path, err = ioutil.TempDir("", "zdir")
 		if err != nil {
@@ -258,8 +258,13 @@ func spawn_generic_shell(kube_config, history, shell string) {
 		}
 		defer file.Close()
 	}
+	PS1 := ""
+	config := config.ReadConfiguration()
+	if config.PS1 != "" {
+		PS1 = "export PS1=\"" + config.PS1 + "\""
+	}
 
-	rc := fmt.Sprintf("%s\n%s", current_rc, extra_rc_configuration)
+	rc := fmt.Sprintf("%s\n%s\n%s", current_rc, extra_rc_configuration, PS1)
 	if debug {
 		fmt.Printf("Writing to rc file: %s:\n", tmp_rc_path)
 		fmt.Printf("%s\n", rc)
