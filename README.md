@@ -150,7 +150,6 @@ setopt inc_append_history
 
 
 ## TODO
-- Read extra/optional configurations like rc files and PS1 from the configuration file (maybe use viper)
 - Improve error checks and messages
 - Add --global flag for updating the namespace or context globally
 - Investigate the use of eval instead of spawning shells
