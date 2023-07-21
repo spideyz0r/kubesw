@@ -89,7 +89,7 @@ kubesw s ctx "somecontext"
 The configuration file is optional. You can see the default values below.
 
 It should be installed in ~/.kubesw/config.yaml
-```
+```yaml
 ---
 # Use a custom PS1 when using kubesw
 # Default: unset
