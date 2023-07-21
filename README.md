@@ -78,9 +78,40 @@ set       => switch, s
 ```
 Some examples:
 ```kubesw get ns
-kubesw set ctx "somecontext"
 kubesw ls ns
+kubesw get ns
 kubesw switch ns "somenamespace"
+kubesw set ctx "somecontext"
+kubesw s ctx "somecontext"
+```
+
+## Configuration file
+The configuration file is optional. You can see the default values below.
+
+It should be installed in ~/.kubesw/config.yaml
+```
+---
+# Use a custom PS1 when using kubesw
+# Default: unset
+PS1: '[\u@\h \W {$(kubesw get ctx) @ $(kubesw get ns)}]\\$ '
+# Set default shell
+# Default: auto
+shell: /bin/bash
+# Configure rc files to be read
+# Note: they are read from your home directory
+# The default values are listed below
+default_rc:
+  bash:
+    - .bashrc
+    - .bash_profile
+    - .profile
+    - .bash_login
+    - .bash_logout
+  zsh:
+    - .zshrc
+    - .zprofile
+    - .zlogin
+    - .zlogout
 ```
 
 ## Autocompletion
@@ -99,7 +130,7 @@ For zshell, pick a path under $fpath and put the contents of `kubesw completion 
 kubesw completion zsh >$(echo $fpath | cut -d " " -f1)/_kubesw
 ```
 
-## Fix shell history
+## Shell history
 In order to have the shell's history, some extra configuration needs to be appended to the rc files.
 This will make each command run to be persisted to the history file right-away.
 
