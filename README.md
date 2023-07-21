@@ -11,14 +11,16 @@ dnf copr enable brandfbb/kubesw
 dnf install kubesw
 ```
 
-### From source
-```
-go build -v -o kubesw
-```
-### Download the binary from the release section
+### Binary: MacOS (amd64/arm64), Windows, Linux   
 ```
 https://github.com/spideyz0r/kubesw/releases
 ```
+### From source
+```
+git checkout https://github.com/spideyz0r/kubesw
+cd kubesw; go build -v -o kubesw
+```
+
 
 ## Usage
 ```
