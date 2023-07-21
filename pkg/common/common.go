@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"k8s.io/client-go/tools/clientcmd"
@@ -189,10 +190,10 @@ func SpawnShell(kube_config, history string) {
 	if debug {
 		fmt.Printf("Spawning shell: %s\n", shell)
 	}
-	switch shell {
-	case "/bin/bash":
+	switch {
+	case regexp.MustCompile(`^.+/bash$`).MatchString(shell):
 		spawn_generic_shell(kube_config, history, "bash")
-	case "/bin/zsh":
+	case regexp.MustCompile(`^.+/zsh$`).MatchString(shell):
 		spawn_generic_shell(kube_config, history, "zsh")
 	default:
 		log.Fatal("Unsupported shell")

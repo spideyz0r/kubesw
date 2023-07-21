@@ -55,7 +55,7 @@ var (
 				fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
 			}
 			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, args[0], "default")
-			history := common.InjectShellHistory("context", args[0])
+			history := common.InjectShellHistory(cmd.CalledAs(), args[0])
 			common.SpawnShell(kube_config, history)
 		},
 	}
