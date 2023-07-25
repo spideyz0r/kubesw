@@ -5,7 +5,7 @@ It's a dynamic tool designed to enhance your Kubernetes workflow by enabling iso
 
 ## Install
 
-### [RPMs](https://copr.fedorainfracloud.org/coprs/brandfbb/kubesw/): Fedora, CentOS, OpenSusi, Rocky, Rhel
+### [RPMs](https://copr.fedorainfracloud.org/coprs/brandfbb/kubesw/): Fedora, CentOS, OpenSuse, Rocky, Rhel
 ```
 dnf copr enable brandfbb/kubesw
 dnf install kubesw
