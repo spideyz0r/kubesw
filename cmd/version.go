@@ -11,7 +11,7 @@ var (
 		Use:   "version",
 		Short: "Get version of kubesw",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("v0.0.11")
+			fmt.Println("v0.0.12")
 		},
 	}
 )

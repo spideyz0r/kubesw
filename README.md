@@ -11,7 +11,7 @@ dnf copr enable brandfbb/kubesw
 dnf install kubesw
 ```
 
-### Binary: MacOS (amd64/arm64), Windows, Linux   
+### Binary: MacOS (amd64/arm64), Windows, Linux
 ```
 https://github.com/spideyz0r/kubesw/releases
 ```
@@ -69,6 +69,22 @@ $ kubesw set namespace kube-system
 $ kubesw get namespace
 kube-system
 ```
+
+## FZF - Fuzzy Finder
+Running the set option without actually providing an argument will allow the context or namespace to be selected in a fzf fashion.
+
+Example:
+```
+kubesw set ns
+> Filter...
+5/5 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+> default
+  kube-node-lease
+  kube-public
+  kube-system
+  kyll
+```
+
 ## Aliases / shortnames
 You can also use the short form for each command:
 ```
@@ -150,7 +166,6 @@ PROMPT_COMMAND="history -a"
 ```
 setopt inc_append_history
 ```
-
 
 ## TODO
 - Improve error checks and messages
