@@ -23,19 +23,23 @@ var (
 		Aliases: []string{"ns", "namespaces"},
 		Short:   "set namespace",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) != 1 {
-				fmt.Println("Please specify a single namespace")
-				return
-			}
 			debug, _ := cmd.Flags().GetBool("debug")
 			common.SetDebug(debug)
 			new_kube_config_path, kubeconfig_kubesw_dir := common.InitialSetup()
+
+			var namespace string
+			if len(args) != 1 {
+				namespace = common.FzfSelect(common.ListNamespaces())
+			}
 			if debug {
 				fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
 			}
-			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, common.GetCurrent("context"), args[0])
-			common.UpdateNamespace(kube_config, args[0])
-			history := common.InjectShellHistory(cmd.CalledAs(), args[0])
+			if namespace == "" {
+				namespace = args[0]
+			}
+			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, common.GetCurrent("context"), namespace)
+			common.UpdateNamespace(kube_config, namespace)
+			history := common.InjectShellHistory(cmd.CalledAs(), namespace)
 			common.SpawnShell(kube_config, history)
 		},
 	}
@@ -44,18 +48,22 @@ var (
 		Aliases: []string{"ctx", "contexts"},
 		Short:   "set a context",
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) != 1 {
-				fmt.Println("Please specify a single context")
-				return
-			}
 			debug, _ := cmd.Flags().GetBool("debug")
 			common.SetDebug(debug)
 			new_kube_config_path, kubeconfig_kubesw_dir := common.InitialSetup()
 			if debug {
 				fmt.Printf("KUBECONFIG: %s\n", new_kube_config_path)
 			}
-			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, args[0], "default")
-			history := common.InjectShellHistory(cmd.CalledAs(), args[0])
+
+			var context string
+			if len(args) != 1 {
+				context = common.FzfSelect(common.ListContexts())
+			}
+			if context == "" {
+				context = args[0]
+			}
+			kube_config := common.UpdateContext(kubeconfig_kubesw_dir, context, "default")
+			history := common.InjectShellHistory(cmd.CalledAs(), context)
 			common.SpawnShell(kube_config, history)
 		},
 	}

@@ -9,7 +9,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/koki-develop/go-fzf"
 	config "github.com/spideyz0r/kubesw/pkg/config"
+
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -308,7 +310,12 @@ func spawn_generic_shell(kube_config, history, shell string) {
 	}
 }
 
-func ListContexts() {
+func PrintContexts() {
+	contexts := ListContexts()
+	fmt.Println(strings.TrimSpace(strings.Join(contexts, "\n")))
+}
+
+func ListContexts() []string {
 	if debug {
 		fmt.Printf("Listing contexts\n")
 	}
@@ -317,10 +324,15 @@ func ListContexts() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(strings.TrimSpace(string(contexts)))
+	return strings.Split(string(contexts), "\n")
 }
 
-func ListNamespaces() {
+func PrintNamespaces() {
+	namespaces := ListNamespaces()
+	fmt.Println(strings.Join(namespaces, "\n"))
+}
+
+func ListNamespaces() []string {
 	if debug {
 		fmt.Printf("Listing namespaces\n")
 	}
@@ -334,5 +346,23 @@ func ListNamespaces() {
 	for _, line := range lines {
 		namespaces = append(namespaces, strings.Split(line, "/")[1])
 	}
-	fmt.Println(strings.Join(namespaces, "\n"))
+	return namespaces
+}
+
+func FzfSelect(items []string) string {
+	f, err := fzf.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	index, err := f.Find(items, func(i int) string { return items[i] })
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var selected string
+	for _, i := range index {
+		selected = items[i]
+	}
+	return selected
 }

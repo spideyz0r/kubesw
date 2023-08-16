@@ -25,7 +25,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
 			common.SetDebug(debug)
-			common.ListNamespaces()
+			common.PrintNamespaces()
 		},
 	}
 	contextListCmd = &cobra.Command{
@@ -35,7 +35,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			debug, _ := cmd.Flags().GetBool("debug")
 			common.SetDebug(debug)
-			common.ListContexts()
+			common.PrintContexts()
 		},
 	}
 )
