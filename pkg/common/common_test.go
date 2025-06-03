@@ -6,31 +6,72 @@ import (
 )
 
 func TestDetectShell(t *testing.T) {
+	// Save original environment
+	originalShell := os.Getenv("SHELL")
+	originalHome := os.Getenv("HOME")
+
+	// Set up a temporary home directory to avoid config file interference
+	tempHome := "/tmp/kubesw_test_home"
+	os.MkdirAll(tempHome, 0755)
+	defer os.RemoveAll(tempHome)
+	os.Setenv("HOME", tempHome)
+
+	defer func() {
+		// Restore original environment
+		if originalShell != "" {
+			os.Setenv("SHELL", originalShell)
+		} else {
+			os.Unsetenv("SHELL")
+		}
+		os.Setenv("HOME", originalHome)
+	}()
+
 	testCases := []struct {
-		shell    string
+		name     string
+		shellEnv string
 		expected string
+		hasError bool
 	}{
 		{
-			shell:    "bash",
+			name:     "bash",
+			shellEnv: "/bin/bash",
 			expected: "/bin/bash",
+			hasError: false,
 		},
 		{
-			shell:    "zsh",
+			name:     "zsh",
+			shellEnv: "/bin/zsh",
 			expected: "/bin/zsh",
+			hasError: false,
 		},
 		{
-			shell:    "",
-			expected: "Failed to detect shell",
+			name:     "empty shell",
+			shellEnv: "",
+			expected: "",
+			hasError: true,
 		},
 	}
 	for _, tc := range testCases {
-		t.Run(tc.shell, func(t *testing.T) {
-			os.Setenv("SHELL", tc.expected)
-			actualShell, _ := detect_shell()
-			if actualShell != tc.expected {
-				t.Errorf("Expected shell to be %s, but got %s", tc.shell, actualShell)
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.shellEnv != "" {
+				os.Setenv("SHELL", tc.shellEnv)
+			} else {
+				os.Unsetenv("SHELL")
 			}
-			os.Unsetenv("SHELL")
+
+			actualShell, err := detect_shell()
+			if tc.hasError {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				}
+			} else {
+				if err != nil {
+					t.Errorf("Expected no error but got: %v", err)
+				}
+				if actualShell != tc.expected {
+					t.Errorf("Expected shell to be %s, but got %s", tc.expected, actualShell)
+				}
+			}
 		})
 	}
 }
